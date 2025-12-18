@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Admin</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+<h1>Admin Panel</h1>
+<div>
+  <h2>Ajouter de l'argent</h2>
+  <input id="userId" type="number" placeholder="ID Utilisateur">
+  <input id="amount" type="number" step="0.01" min="0.01" placeholder="Montant">
+  <button id="addBtn">Ajouter</button>
+  <div id="msg"></div>
+</div>
+
+<div>
+  <h2>Utilisateurs</h2>
+  <button id="loadUsers">Charger</button>
+  <ul id="users"></ul>
+</div>
+
+<script>
+const token = localStorage.getItem('token');
+if(!token) location.href='/login.html';
+
+const msg = document.getElementById('msg');
+const usersEl = document.getElementById('users');
+
+async function loadUsers(){
+  const r = await fetch('/api/admin/users',{
+    headers:{'Authorization':'Bearer '+token}
+  });
+  const d = await r.json();
+  usersEl.innerHTML='';
+  d.forEach(u=>{
+    const li = document.createElement('li');
+    li.textContent = `ID:${u.id} | ${u.username} | Solde:${u.balance}`;
+    usersEl.appendChild(li);
+  });
+}
+
+document.getElementById('addBtn').onclick = async () => {
+  const userId = Number(document.getElementById('userId').value);
+  const amount = Number(document.getElementById('amount').value);
+
+  if(!userId || !amount || amount <= 0){
+    msg.textContent = 'Valeurs invalides';
+    return;
+  }
+
+  const r = await fetch('/api/admin/add-funds',{
+    method:'POST',
+    headers:{
+      'Content-Type':'application/json',
+      'Authorization':'Bearer '+token
+    },
+    body:JSON.stringify({ userId, amount })
+  });
+
+  const d = await r.json();
+
+  if(d.error){
+    msg.textContent = d.error;
+  } else {
+    msg.textContent = `Solde mis à jour: ${d.balance}`;
+    loadUsers(); // ?? RAFRAÎCHISSEMENT ICI
+  }
+};
+loadUsers();
+</script>
+
+</body>
+</html>

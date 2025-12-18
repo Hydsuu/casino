@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="/style.css">
+  <meta charset="UTF-8">
+  <title>Casino</title>
+</head>
+<body>
+  <h1>?? Casino</h1>
+
+  <p>Solde : <span id="balance">0</span></p>
+
+  <button onclick="location.href='plinko.html'">Plinko</button>
+  <button disabled>Limbo (bientôt)</button>
+  <button disabled>Blackjack (bientôt)</button>
+
+  <script type="module">
+    import { requireAuth } from "./js/auth.js";
+    import { loadBalance } from "./js/balance.js";
+
+    requireAuth();
+    loadBalance().then(b => {
+      document.getElementById("balance").textContent = b;
+    });
+  </script>
+</body>
+</html>

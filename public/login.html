@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<link rel="stylesheet" href="/style.css">
+<meta charset="UTF-8">
+<title>Casino Login</title>
+<style>
+  body { font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background: #1e1e1e; color: #fff; }
+  form { display: flex; flex-direction: column; background: #2c2c2c; padding: 20px; border-radius: 8px; }
+  input { margin-bottom: 10px; padding: 8px; border-radius: 4px; border: none; }
+  button { padding: 10px; border: none; border-radius: 4px; background: #ff9800; color: #fff; cursor: pointer; }
+  button:hover { background: #e68900; }
+</style>
+</head>
+<body>
+
+<form id="loginForm">
+  <h2>Login</h2>
+  <input type="text" id="username" placeholder="Nom d'utilisateur" required>
+  <input type="password" id="password" placeholder="Mot de passe" required>
+  <button type="submit">Se connecter</button>
+  <p id="message"></p>
+</form>
+
+<script>
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const username = document.getElementById('username').value;
+  const password = document.getElementById('password').value;
+  const messageEl = document.getElementById('message');
+
+  try {
+    const res = await fetch('http://141.253.113.60:3000/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+
+    const data = await res.json();
+    if (res.ok) {
+      localStorage.setItem('token', data.token); // sauvegarde le token
+      messageEl.textContent = `Connecté ! Bienvenue ${data.user.username}`;
+      messageEl.style.color = 'lightgreen';
+    } else {
+      messageEl.textContent = data.error || 'Erreur de connexion';
+      messageEl.style.color = 'red';
+    }
+  } catch (err) {
+    messageEl.textContent = 'Erreur réseau';
+    messageEl.style.color = 'red';
+    console.error(err);
+  }
+});
+</script>
+
+</body>
+</html>

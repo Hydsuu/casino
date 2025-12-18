@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Plinko</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+<div class="topbar">
+  <h1>?? PLINKO</h1>
+  <div class="balance">Solde : <span id="balance">0</span></div>
+</div>
+
+<div class="game">
+
+  <div class="plinko-container">
+    <div id="ball"></div>
+
+    <!-- Pegs -->
+    <div class="peg-row r1"></div>
+    <div class="peg-row r2"></div>
+    <div class="peg-row r3"></div>
+    <div class="peg-row r4"></div>
+    <div class="peg-row r5"></div>
+    <div class="peg-row r6"></div>
+    <div class="peg-row r7"></div>
+    <div class="peg-row r8"></div>
+    <div class="peg-row r9"></div>
+
+    <!-- Multipliers -->
+    <div class="multipliers">
+      <div>x0</div>
+      <div>x0.5</div>
+      <div>x1</div>
+      <div>x2</div>
+      <div>x5</div>
+      <div>x2</div>
+      <div>x1</div>
+      <div>x0.5</div>
+      <div>x0</div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <input id="bet" type="number" placeholder="Mise">
+    <button id="play">Lancer</button>
+    <div class="warning" id="warning"></div>
+    <div class="result" id="result"></div>
+  </div>
+
+</div>
+
+<script>
+const token = localStorage.getItem('token');
+if (!token) location.href = '/login.html';
+
+const balanceEl = document.getElementById('balance');
+const betEl = document.getElementById('bet');
+const playBtn = document.getElementById('play');
+const ball = document.getElementById('ball');
+const warning = document.getElementById('warning');
+const resultEl = document.getElementById('result');
+
+let balance = 0;
+
+// -------- Load balance
+async function loadBalance() {
+  const r = await fetch('/api/user/balance', {
+    headers: { Authorization: 'Bearer ' + token }
+  });
+  const d = await r.json();
+  balance = Number(d.balance);
+  balanceEl.textContent = balance;
+}
+loadBalance();
+
+// -------- Play
+playBtn.onclick = async () => {
+  warning.textContent = '';
+  resultEl.textContent = '';
+
+  const bet = Number(betEl.value);
+  if (!bet || bet <= 0) return;
+
+  if (bet > balance) {
+    warning.textContent = 'Solde insuffisant';
+    return;
+  }
+
+  playBtn.disabled = true;
+  ball.style.opacity = 1;
+  ball.style.animation = 'none';
+  void ball.offsetWidth;
+
+  const path = [];
+  let left = 240;
+
+  for (let i = 0; i < 9; i++) {
+    left += Math.random() > 0.5 ? 30 : -30;
+    path.push(left);
+  }
+
+  let keyframes = '';
+  path.forEach((x, i) => {
+    keyframes += `
+      ${(i+1)*10}% { top:${40+i*38}px; left:${x}px; }
+    `;
+  });
+
+  const style = document.createElement('style');
+  style.innerHTML = `
+    @keyframes drop {
+      ${keyframes}
+      100% { top:360px; left:${path[path.length-1]}px; }
+    }
+  `;
+  document.head.appendChild(style);
+
+  ball.style.animation = 'drop 1.8s ease-in-out forwards';
+
+  const res = await fetch('/api/game/plinko/play', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: 'Bearer ' + token
+    },
+    body: JSON.stringify({
+      bet,
+      roundId: Date.now()
+    })
+  });
+
+  const data = await res.json();
+
+  setTimeout(() => {
+    playBtn.disabled = false;
+    ball.style.opacity = 0;
+    document.head.removeChild(style);
+
+    if (data.error) {
+      resultEl.textContent = data.error;
+      return;
+    }
+
+    balance = data.result.balance_after;
+    balanceEl.textContent = balance;
+
+    resultEl.textContent =
+      data.result.payout > 0
+        ? `?? Gagné ${data.result.payout}`
+        : `? Perdu`;
+  }, 1800);
+};
+</script>
+
+</body>
+</html>

@@ -1,0 +1,110 @@
+body {
+  margin: 0;
+  background: #0b0f1a;
+  color: #fff;
+  font-family: Arial, sans-serif;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  padding: 15px 30px;
+  background: #13182a;
+}
+
+.game {
+  display: flex;
+  justify-content: center;
+  margin-top: 30px;
+  gap: 40px;
+}
+
+.plinko-container {
+  position: relative;
+  width: 500px;
+  height: 420px;
+  background: #11162a;
+  border-radius: 16px;
+  padding-top: 20px;
+}
+
+.peg-row {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 18px;
+}
+
+.peg-row::before {
+  content: '';
+  display: flex;
+  gap: 28px;
+}
+
+.peg-row.r1::before { content:'•'; }
+.peg-row::before {
+  color: #4fc3f7;
+  font-size: 18px;
+}
+
+#ball {
+  position: absolute;
+  top: 10px;
+  left: 240px;
+  width: 14px;
+  height: 14px;
+  background: #fff;
+  border-radius: 50%;
+  opacity: 0;
+  z-index: 10;
+}
+
+.multipliers {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  background: #0c1020;
+}
+
+.multipliers div {
+  text-align: center;
+  padding: 10px;
+  font-size: 14px;
+  border-right: 1px solid #1c2240;
+}
+
+.controls {
+  width: 200px;
+}
+
+.controls input {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+}
+
+.controls button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  font-size: 16px;
+  background: #4cafef;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.controls button:disabled {
+  background: #555;
+}
+
+.warning {
+  margin-top: 10px;
+  color: #ff5252;
+}
+
+.result {
+  margin-top: 10px;
+  font-size: 18px;
+}

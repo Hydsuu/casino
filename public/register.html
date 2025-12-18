@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <link rel="stylesheet" href="/style.css">
+  <meta charset="UTF-8">
+  <title>Register</title>
+</head>
+<body>
+
+<h2>Créer un compte</h2>
+
+<input id="username" placeholder="Username"><br><br>
+<input id="password" type="password" placeholder="Password"><br><br>
+<button onclick="register()">Créer le compte</button>
+
+<p id="msg"></p>
+
+<script>
+async function register() {
+  const res = await fetch('/api/register', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({
+      username: username.value,
+      password: password.value
+    })
+  });
+
+  const data = await res.json();
+  if(data.token){
+    localStorage.setItem('token', data.token);
+    window.location.href = '/index.html';
+  } else {
+    msg.innerText = data.error;
+  }
+}
+</script>
+
+</body>
+</html>
